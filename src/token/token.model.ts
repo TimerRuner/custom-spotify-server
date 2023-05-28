@@ -3,7 +3,7 @@ import {User} from "../user/user.model";
 
 interface ITokenModel {
     refreshToken: string
-
+    userId: string
 }
 
 @Table({tableName: "tokens"})
