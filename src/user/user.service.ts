@@ -26,16 +26,13 @@ export class UserService {
         const user = await this.userRepository.create(dto)
 
         user.roleId = role.id
+        await user.save()
 
-        return await user.save()
+        return await this.userRepository.findOne({where: {email: user.email}, include: [Role]})
     }
 
     async getUserByEmail(email: string){
-        const user = await this.userRepository.findOne({where: {email}, include: [Role]})
-        if(!user) {
-            throw new NotFoundException(`User with email - ${email} doesn't exist`)
-        }
-        return user
+        return await this.userRepository.findOne({where: {email}, include: [Role]})
     }
 
     async getUserById(id: string){

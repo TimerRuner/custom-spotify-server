@@ -1,4 +1,4 @@
 export class CreateAccountDto {
     readonly activationLink: string
-    readonly userId: string
+    readonly userId: number
 }

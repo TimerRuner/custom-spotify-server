@@ -5,6 +5,7 @@ import {ConfigService} from "@nestjs/config";
 import {MailerService} from "@nestjs-modules/mailer";
 import {CreateAccountDto} from "./dto/create-account.dto";
 import * as uuid from "uuid"
+import { Op } from "sequelize";
 
 @Injectable()
 export class AccountService {
@@ -22,7 +23,7 @@ export class AccountService {
         }
     }
 
-    async generateActivationLink(userId: string, email: string) {
+    async generateActivationLink(userId: number, email: string) {
         const activationLink = `${this.configService.get<string>('API_URL')}/api/account/activate/${uuid.v4()}`
         const account = await this.create({userId, activationLink})
         await this.sendActivationLink(email, activationLink)
@@ -30,7 +31,13 @@ export class AccountService {
     }
 
     async activate(activationLink) {
-        const account = await this.accountProvider.findOne({where: {activationLink}})
+        const account = await this.accountProvider.findOne({
+            where: {
+                activationLink: {
+                    [Op.like]: `%${activationLink}%`
+                }
+            }
+        })
         if(!account) {
             throw new HttpException(`Uncorrect activation link`, HttpStatus.BAD_REQUEST)
         }
@@ -38,7 +45,7 @@ export class AccountService {
         return await account.save()
     }
 
-    async getAccountStatusByUserId(userId: string) {
+    async getAccountStatusByUserId(userId: number) {
         const account = await this.accountProvider.findOne({where: {userId}})
         return account.isActivated
     }
