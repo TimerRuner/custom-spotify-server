@@ -9,11 +9,13 @@ import {Account} from "../account/account.model";
 import {Albom} from "../albom/albom.model";
 import {Track} from "../track/track.model";
 import {RoleModule} from "../role/role.module";
+import { TokenModule } from "../token/token.module";
 
 @Module({
   imports: [
       SequelizeModule.forFeature([Role, User, Token, Account, Albom, Track]),
-      RoleModule
+      RoleModule,
+      TokenModule
   ],
   controllers: [UserController],
   providers: [UserService],

@@ -26,7 +26,8 @@ export class AuthService {
         id: user.dataValues.id,
         fullName: user.dataValues.fullName,
         email: user.dataValues.email,
-        isActivated: account.isActivated
+        isActivated: account.isActivated,
+        role: user.role.value
       },
       refreshToken,
       accessToken
