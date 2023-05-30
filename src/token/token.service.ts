@@ -28,7 +28,7 @@ export class TokenService {
 
     async saveToken(userId, refreshToken) {
         try {
-            const record = await this.tokenProvider.findOne({where: {refreshToken}})
+            const record = await this.tokenProvider.findOne({where: {userId}})
             if(record){
                 record.refreshToken = refreshToken
                 return await record.save()

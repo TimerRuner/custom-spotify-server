@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from "@nestjs/common";
 import { LoginAuthDto } from "./dto/login-auth.dto";
 import { RegistrationAuthDto } from "./dto/registration-auth.dto";
 import { UserService } from "../user/user.service";
@@ -19,6 +19,7 @@ export class AuthService {
   async generateToken(user, account) {
     const filteredObject = filterDto({...user.dataValues, role: user.dataValues.role.value, isActivated: account.isActivated}, ["password", "id", "fullName", "roleId", "createdAt", "updatedAt"])
     const {refreshToken, accessToken} = await this.tokenService.generateTokens(filteredObject)
+    await this.tokenService.saveToken(user.id, refreshToken)
 
     return {
       user: {
@@ -42,7 +43,7 @@ export class AuthService {
       throw new HttpException(`Wrong password`, HttpStatus.BAD_REQUEST)
     }
     const accountStatus = await this.accountService.getAccountStatusByUserId(user.id)
-    return this.generateToken(user, {isActivated: accountStatus})
+    return await this.generateToken(user, {isActivated: accountStatus})
   }
 
   async registration(dto: RegistrationAuthDto) {
@@ -58,11 +59,22 @@ export class AuthService {
     return await this.generateToken(user, account)
   }
 
-  async logout() {
-
+  async logout(refreshToken) {
+    await this.tokenService.deleteToken(refreshToken)
   }
 
-  async refresh() {
+  async refresh(refreshToken) {
+    if(!refreshToken) {
+      throw new UnauthorizedException("User unauthorized")
+    }
+    const isValidToken = await this.tokenService.validateToken(refreshToken)
+    const tokenData = await this.tokenService.findToken(refreshToken)
+    if(!isValidToken && !tokenData) {
+      throw new UnauthorizedException("User unauthorized")
+    }
+    const user = await this.userService.getUserById(tokenData.userId)
+    const accountStatus = await this.accountService.getAccountStatusByUserId(user.id)
 
+    return await this.generateToken(user, {isActivated: accountStatus})
   }
 }

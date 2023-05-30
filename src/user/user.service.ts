@@ -35,7 +35,7 @@ export class UserService {
         return await this.userRepository.findOne({where: {email}, include: [Role]})
     }
 
-    async getUserById(id: string){
+    async getUserById(id: number){
         const user = await this.userRepository.findOne({where: {id}, include: [Role]})
         if(!user) {
             throw new NotFoundException(`User with id - ${id} doesn't exist`)
