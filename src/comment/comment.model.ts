@@ -1,4 +1,4 @@
-import {Column, DataType, ForeignKey, Model, Table} from "sequelize-typescript";
+import {BelongsTo, Column, DataType, ForeignKey, Model, Table} from "sequelize-typescript";
 import {Track} from "../track/track.model";
 
 interface ICommentModel {
@@ -21,4 +21,7 @@ export class Comment extends Model<Comment, ICommentModel> {
     @ForeignKey(() => Track)
     @Column
     trackId: number
+
+    @BelongsTo(() => Track)
+    track: Track
 }

@@ -1,4 +1,4 @@
-import {Column, DataType, ForeignKey, HasMany, Model, Table} from "sequelize-typescript";
+import {BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Table} from "sequelize-typescript";
 import {User} from "../user/user.model";
 import {Track} from "../track/track.model";
 
@@ -22,6 +22,9 @@ export class Albom extends Model<Albom, IAlbomModel> {
     @ForeignKey(() => User)
     @Column
     userId: number
+
+    @BelongsTo(() => User)
+    user: User
 
     @HasMany(() => Track)
     tracks: Track[]
