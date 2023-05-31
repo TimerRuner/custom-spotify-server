@@ -78,4 +78,8 @@ export class AuthService {
 
     return await this.generateToken(user, {isActivated: accountStatus})
   }
+
+  async checkUser(email: string) {
+    return await this.userService.getUserByEmail(email)
+  }
 }

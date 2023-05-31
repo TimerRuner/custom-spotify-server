@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Post, Req, Res, UsePipes } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req, Res, UseGuards, UsePipes } from "@nestjs/common";
 import { LoginAuthDto } from "./dto/login-auth.dto";
 import { RegistrationAuthDto } from "./dto/registration-auth.dto";
 import { Response, Request } from "express";
 import { AuthService } from "./auth.service";
 import { CustomPipeValidation } from "../pipes/validation.pipe";
+import { AuthGuard } from "@nestjs/passport";
 
 @Controller('auth')
 export class AuthController {
@@ -41,5 +42,23 @@ export class AuthController {
     const authData = await this.authService.refresh(refreshToken)
     res.cookie("refreshToken", authData.refreshToken, {maxAge: 30 * 60 * 1000, httpOnly: true})
     res.json(authData)
+  }
+
+  @Get("google")
+  @UseGuards(AuthGuard("google"))
+  async googleLogin() {}
+
+  @Get("google/callback")
+  @UseGuards(AuthGuard("google"))
+  async googleCallback(@Req() req, @Res() res) {
+   const {user} = req
+    const userExist = !!Object.keys(user).length
+    if(userExist) {
+      res.cookie('refreshToken', user.refreshToken, {maxAge: 30 * 60 * 1000, httpOnly: true })
+      res.cookie('user', JSON.stringify(user), {maxAge: 30 * 60 * 1000})
+      return res.redirect("http://localhost:3000")
+    } else {
+      return res.redirect("http://localhost:3000/signIn")
+    }
   }
 }
