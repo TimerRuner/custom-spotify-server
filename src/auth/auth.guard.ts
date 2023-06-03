@@ -1,6 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { ROLE_CONST } from "./role.decorator";
 import { TokenService } from "../token/token.service";
 
 @Injectable()
@@ -8,11 +7,6 @@ export class AuthGuard implements CanActivate {
   constructor(private tokenService: TokenService, private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const role = this.reflector.get<string[]>(ROLE_CONST, context.getHandler());
-    if(!role){
-      return true
-    }
-
     try {
       const request = context.switchToHttp().getRequest();
 

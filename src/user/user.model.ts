@@ -4,6 +4,7 @@ import {Token} from "../token/token.model";
 import {Account} from "../account/account.model";
 import {Albom} from "../albom/albom.model";
 import {Track} from "../track/track.model";
+import { Comment } from "../comment/comment.model";
 
 interface IUserDto {
     fullName: string
@@ -42,4 +43,7 @@ export class User extends Model<User, IUserDto> {
 
     @HasMany(() => Track)
     tracks: Track[]
+
+    @HasMany(() => Comment)
+    comments: Comment[]
 }
