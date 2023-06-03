@@ -9,7 +9,6 @@ import { RoleModule } from './role/role.module';
 import { CommentModule } from './comment/comment.module';
 import { TrackModule } from './track/track.module';
 import { AlbomModule } from './albom/albom.module';
-import * as process from "process";
 import {User} from "./user/user.model";
 import {Role} from "./role/role.model";
 import {Token} from "./token/token.model";
@@ -17,6 +16,7 @@ import {Account} from "./account/account.model";
 import {Albom} from "./albom/albom.model";
 import {Track} from "./track/track.model";
 import {Comment} from "./comment/comment.model";
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -32,7 +32,9 @@ import {Comment} from "./comment/comment.model";
         password: process.env.DB_PASSWORD,
         database: process.env.DB_DATABASE,
         models: [User, Role, Token, Account, Albom, Track, Comment],
-        autoLoadModels: true
+        autoLoadModels: true,
+        synchronize: true,
+        logging: true
       }),
       UserModule,
       TokenModule,
@@ -41,7 +43,8 @@ import {Comment} from "./comment/comment.model";
       RoleModule,
       CommentModule,
       TrackModule,
-      AlbomModule
+      AlbomModule,
+      FilesModule
   ],
 })
 export class AppModule {}

@@ -6,10 +6,14 @@ import {User} from "../user/user.model";
 import {Track} from "./track.model";
 import {Albom} from "../albom/albom.model";
 import {Comment} from "../comment/comment.model";
+import { FilesModule } from "../files/files.module";
+import { TokenModule } from "../token/token.module";
 
 @Module({
   imports: [
-      SequelizeModule.forFeature([User, Track, Albom, Comment])
+      SequelizeModule.forFeature([User, Albom, Track, Comment]),
+      FilesModule,
+      TokenModule
   ],
   controllers: [TrackController],
   providers: [TrackService],

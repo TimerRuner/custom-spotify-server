@@ -10,9 +10,10 @@ interface ITrackModel {
     listens: number
     picture: string
     audio: string
+    userId: number
 }
 
-@Table({ tableName: "tracks" })
+@Table({ tableName: "tracks", createdAt: false, updatedAt: false })
 export class Track extends Model<Track, ITrackModel> {
     @Column({type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true})
     id: number
@@ -26,7 +27,7 @@ export class Track extends Model<Track, ITrackModel> {
     @Column({type: DataType.STRING, allowNull: true})
     text: string
 
-    @Column({type: DataType.NUMBER, allowNull: false, defaultValue: 0 })
+    @Column({type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
     listens: number
 
     @Column({type: DataType.STRING, allowNull: true})
