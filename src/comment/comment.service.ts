@@ -47,4 +47,8 @@ export class CommentService {
       throw new BadRequestException(`It's not your comment`)
     }
   }
+
+  async deleteAllByTrackId(trackId: number) {
+    return await this.commentProvider.destroy({where: {trackId}})
+  }
 }
