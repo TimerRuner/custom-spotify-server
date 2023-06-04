@@ -66,8 +66,9 @@ export class TrackController {
   @Roles(ERole.CREATOR)
   @UseGuards(RoleGuard)
   @Delete("delete/:id")
-  async deleteOneById(@Param("id") id: number) {
-    return await this.trackService.deleteTrack(id)
+  async deleteOneById(@Req() req, @Param("id") id: number) {
+    const {user} = req
+    return await this.trackService.deleteTrack(id, user.id)
   }
 
   @Roles(ERole.CREATOR)
@@ -77,9 +78,10 @@ export class TrackController {
     {name: "picture", maxCount: 1},
     {name: "audio", maxCount: 1}
   ]))
-  async updateTrack(@UploadedFiles() files, @Body() dto: CreateTrackDto, @Param("id") id: number) {
+  async updateTrack(@Req() req, @UploadedFiles() files, @Body() dto: CreateTrackDto, @Param("id") id: number) {
     const { picture, audio } = files
-    return await this.trackService.updateTrack(id, dto, this.checkDtoFiles(picture), this.checkDtoFiles(audio))
+    const {user} = req
+    return await this.trackService.updateTrack(id, dto, this.checkDtoFiles(picture), this.checkDtoFiles(audio), user.id)
   }
 
 }

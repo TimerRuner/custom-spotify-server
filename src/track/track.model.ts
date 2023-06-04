@@ -14,7 +14,7 @@ interface ITrackModel {
 }
 
 @Table({ tableName: "tracks", createdAt: false, updatedAt: false })
-export class Track extends Model<Track, ITrackModel> {
+export class Track extends Model<Track> {
     @Column({type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true})
     id: number
 

@@ -7,16 +7,24 @@ import { CreateTrackDto } from "./dto/create-track.dto";
 import { Op } from "sequelize";
 import { Comment } from "../comment/comment.model";
 import { UpdateTrackDto } from "./dto/update-track.dto";
-
-
+import { CommentService } from "../comment/comment.service";
 
 @Injectable()
 export class TrackService {
   constructor(
     @InjectModel(Track) private readonly trackProvider: typeof Track,
     private readonly filesService: FilesService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly commentService: CommentService
   ) {}
+
+  async checkUser(id: number, userId: number) {
+    const comment = await this.trackProvider.findOne({where: {id}})
+    if(comment.userId !== userId) {
+      return false
+    }
+    return true
+  }
 
   async createTrack(dto: CreateTrackDto, picture, audio, userId) {
     const track = await this.trackProvider.findOne({where: {name: dto.name}})
@@ -67,47 +75,68 @@ export class TrackService {
     return await this.trackProvider.findAll({where: {name: {[Op.iLike]: `%${query}%`}}, include: [Comment]})
   }
 
-  async deleteTrack(id: number) {
-    //todo realize delete all comments of this track
-    if(!id) {
-      throw new BadRequestException("Id doesn't exist")
+  async deleteTrack(id: number, userId: number) {
+    const isCorrectUser = await this.checkUser(id, userId)
+    if(isCorrectUser){
+      if(!id) {
+        throw new BadRequestException("Id doesn't exist")
+      }
+      const track = await this.trackProvider.findOne({where: {id}})
+      if(!track) {
+        throw new BadRequestException(`Track by this id doesn't exist`)
+      }
+      await this.filesService.deleteFile(this.configService.get("BUCKET_NAME"), track.picture)
+      await this.filesService.deleteFile(this.configService.get("BUCKET_NAME"), track.audio)
+
+
+      const deletedTrack= await this.trackProvider.destroy({where: {id}})
+      await this.commentService.deleteAllByTrackId(id)
+      return deletedTrack
+    } else {
+      throw new BadRequestException(`It's not your track`)
     }
-    const track = await this.trackProvider.findOne({where: {id}})
-    if(!track) {
-      throw new BadRequestException(`Track by this id doesn't exist`)
-    }
-    await this.filesService.deleteFile(this.configService.get("BUCKET_NAME"), track.picture)
-    await this.filesService.deleteFile(this.configService.get("BUCKET_NAME"), track.audio)
-    return await this.trackProvider.destroy({where: {id}})
   }
 
-  async updateTrack(id: number, dto: CreateTrackDto, picture, audio) {
-    let pictureSource, audioSource
-    const dtoIn: UpdateTrackDto = {...dto}
-    if(!id) {
-      throw new BadRequestException("Id doesn't exist")
-    }
-    const track = await this.trackProvider.findOne({where: {id}})
-    if(!track) {
-      throw new BadRequestException(`Track wasn't found by this id - ${id}`)
-    }
-    if(picture){
-      await this.filesService.deleteFile(this.configService.get("BUCKET_NAME"), track.picture)
-      pictureSource = await this.filesService.uploadFile(picture, this.configService.get("BUCKET_NAME"))
-      dtoIn.picture = pictureSource
-    }
-    if(audio){
-      await this.filesService.deleteFile(this.configService.get("BUCKET_NAME"), track.audio)
-      audioSource = await this.filesService.uploadFile(audio, this.configService.get("BUCKET_NAME"))
-      dtoIn.audio = audioSource
-    }
-    if (!picture) delete dtoIn.picture
-    if (!audio) delete dtoIn.audio
+  async updateTrack(id: number, dto: CreateTrackDto, picture, audio, userId: number) {
+    const isCorrectUser = await this.checkUser(id, userId)
+    if(isCorrectUser){
+      let pictureSource, audioSource
+      const dtoIn: UpdateTrackDto = {...dto}
+      if(!id) {
+        throw new BadRequestException("Id doesn't exist")
+      }
+      const trackByName = await this.trackProvider.findOne({where: {name: dto.name}})
+      if(trackByName) {
+        throw new BadRequestException("Track with such name already exist")
+      }
+      const track = await this.trackProvider.findOne({where: {id}})
+      if(!track) {
+        throw new BadRequestException(`Track wasn't found by this id - ${id}`)
+      }
+      if(picture){
+        await this.filesService.deleteFile(this.configService.get("BUCKET_NAME"), track.picture)
+        pictureSource = await this.filesService.uploadFile(picture, this.configService.get("BUCKET_NAME"))
+        dtoIn.picture = pictureSource
+      }
+      if(audio){
+        await this.filesService.deleteFile(this.configService.get("BUCKET_NAME"), track.audio)
+        audioSource = await this.filesService.uploadFile(audio, this.configService.get("BUCKET_NAME"))
+        dtoIn.audio = audioSource
+      }
+      if (!picture) delete dtoIn.picture
+      if (!audio) delete dtoIn.audio
 
-    const [rowsAffected, [updatedRecords]] = await this.trackProvider.update(dtoIn, {where: {id}, returning: true})
-    if(!rowsAffected) {
-      throw new NotFoundException(`User with id ${id} does not exist`)
+      const [rowsAffected, [updatedRecords]] = await this.trackProvider.update(dtoIn, {where: {id}, returning: true})
+      if(!rowsAffected) {
+        throw new NotFoundException(`Track with id ${id} does not exist`)
+      }
+      return updatedRecords
+    } else {
+      throw new BadRequestException(`It's not your track`)
     }
-    return updatedRecords
+  }
+
+  async removeAlbomsId(albomId: number) {
+    await this.trackProvider.update({albomId: null}, {where: {albomId}})
   }
 }
