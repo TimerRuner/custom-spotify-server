@@ -12,9 +12,9 @@ async function start() {
   app.use(cookieParser())
   app.use(cors({
     origin: UI_ORIGIN,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credential: true
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
   }))
 
   app.setGlobalPrefix("api")
