@@ -5,11 +5,13 @@ import { Response, Request } from "express";
 import { AuthService } from "./auth.service";
 import { CustomPipeValidation } from "../pipes/validation.pipe";
 import { AuthGuard } from "@nestjs/passport";
+import { ConfigService } from "@nestjs/config";
 
 @Controller('auth')
 export class AuthController {
   constructor(
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService
   ) {}
 
   @UsePipes(CustomPipeValidation)
@@ -56,9 +58,9 @@ export class AuthController {
     if(userExist) {
       res.cookie('refreshToken', user.refreshToken, {maxAge: 30 * 60 * 1000, httpOnly: true })
       res.cookie('user', JSON.stringify(user), {maxAge: 30 * 60 * 1000})
-      return res.redirect("http://localhost:3000")
+      return res.redirect(this.configService.get("UI_ORIGIN"))
     } else {
-      return res.redirect("http://localhost:3000/signIn")
+      return res.redirect(`${this.configService.get("UI_ORIGIN")}/signup`)
     }
   }
 }
