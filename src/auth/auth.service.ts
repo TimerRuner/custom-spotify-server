@@ -17,7 +17,7 @@ export class AuthService {
   ) {}
 
   async generateToken(user, account) {
-    const filteredObject = filterDto({...user.dataValues, role: user.dataValues.role.value, isActivated: account.isActivated}, ["password", "fullName", "roleId", "createdAt", "updatedAt"])
+    const filteredObject = filterDto({...user.dataValues, role: user.dataValues.role.value, isActivated: account.isActivated}, ["password", "roleId", "createdAt", "updatedAt"])
     const {refreshToken, accessToken} = await this.tokenService.generateTokens(filteredObject)
     await this.tokenService.saveToken(user.id, refreshToken)
 
