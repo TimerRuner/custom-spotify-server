@@ -12,7 +12,7 @@ export class CommentController {
   async createComment(@Req() req, @Body() dto: CreateCommentDto) {
     const {user} = req
 
-    const dtoIn = {...dto, userId: user.id}
+    const dtoIn = {...dto, userId: user.id, name: user.fullName}
     return await this.commentService.createComment(dtoIn)
   }
 

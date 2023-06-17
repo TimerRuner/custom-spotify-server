@@ -35,6 +35,7 @@ export class AuthController {
     const refreshToken = req.cookies["refreshToken"]
     await this.authService.logout(refreshToken)
     res.clearCookie("refreshToken", {httpOnly: true})
+    res.clearCookie("user", {httpOnly: true})
     res.json({})
   }
 

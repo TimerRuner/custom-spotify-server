@@ -54,9 +54,13 @@ export class TrackController {
     return await this.trackService.getAllTracks(offset, limit)
   }
 
-  @Get("/search")
-  async searchTrack(@Query("query") query: string) {
-    return await this.trackService.searchTrack(query)
+  @Get("/search/:query")
+  async searchTrack(
+    @Param("query") query: string,
+    @Query("offset") offset: number,
+    @Query("limit") limit: number
+  ) {
+    return await this.trackService.searchTrack(query, offset, limit)
   }
   @Get("/:id")
   async getOneById(@Param("id") id: number){

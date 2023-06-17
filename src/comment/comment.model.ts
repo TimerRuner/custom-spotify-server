@@ -6,6 +6,7 @@ interface ICommentModel {
     author: string
     text: string
     trackId: number
+    name: string
 }
 
 @Table({tableName: "comments"})
@@ -15,6 +16,9 @@ export class Comment extends Model<Comment, ICommentModel> {
 
     @Column({type: DataType.STRING, allowNull: false})
     text: string
+
+    @Column({type: DataType.STRING, allowNull: false})
+    name: string
 
     @ForeignKey(() => User)
     @Column

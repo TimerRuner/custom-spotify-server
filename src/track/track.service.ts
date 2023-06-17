@@ -52,12 +52,17 @@ export class TrackService {
     }
   }
 
-  async getAllTracks(offset: number = 0, limit: number = 0) {
-    return await this.trackProvider.findAll({
+  async getAllTracks(offset: number = 0, limit: number = 5) {
+    const tracks = await this.trackProvider.findAll({
       limit,
       offset,
       include: [Comment]
     })
+    const totalCount = await this.trackProvider.count();
+    return {
+      tracks,
+      totalCount
+    }
   }
 
   async getOneTrack(id: number) {
@@ -71,8 +76,19 @@ export class TrackService {
     return track
   }
 
-  async searchTrack(query: string) {
-    return await this.trackProvider.findAll({where: {name: {[Op.iLike]: `%${query}%`}}, include: [Comment]})
+  async searchTrack(query: string, offset: number = 0, limit: number = 5) {
+    const tracks = await this.trackProvider.findAll({where: {name: {[Op.iLike]: `%${query}%`}}, offset, limit, include: [Comment]})
+    const totalCount = await Track.count({
+      where: {
+        name: {
+          [Op.iLike]: `%${query}%`,
+        },
+      },
+    });
+    return {
+      tracks,
+      totalCount
+    }
   }
 
   async deleteTrack(id: number, userId: number) {

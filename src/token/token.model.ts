@@ -11,7 +11,7 @@ export class Token extends Model<Token, ITokenModel> {
     @Column({type: DataType.INTEGER, unique: true, primaryKey: true, autoIncrement: true})
     id: number
 
-    @Column({type: DataType.STRING, unique: true, allowNull: false})
+    @Column({type: DataType.STRING(5000), unique: true, allowNull: false})
     refreshToken: string
 
     @ForeignKey(() => User)
